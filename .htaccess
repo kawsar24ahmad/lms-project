@@ -1,3 +1,10 @@
 ReWriteEngine On
 
-ReWriteRule ^about$   about.php    [L]
+ReWriteRule ^about$                 about.php                   [L]
+ReWriteRule ^login$                 login.php                   [L]
+ReWriteRule ^register$              register.php                [L]
+ReWriteRule ^student-dashboard$     student-dashboard.php       [L]
+ReWriteRule ^forget-password$       forget-password.php           [L]
+ReWriteRule ^logout$                logout.php           [L]
+ReWriteRule ^student-reset-password$                student-reset-password.php           [L]
+ReWriteRule ^student-profile$                student-profile.php           [L]

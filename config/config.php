@@ -15,7 +15,7 @@ define("ADMIN_URL", BASE_URL."admin/");
 
 // stmp 
 define( "SMTP_HOST", "sandbox.smtp.mailtrap.io");
-define( "SMTP_PORT", "2525");
+define( "SMTP_PORT", "587");
 define( "SMTP_USERNAME", "94bd28e792ac1b");
 define( "SMTP_PASSWORD", "8bbebf9a3a8da1");
 define( "SMTP_FORM", "lms@info.com");

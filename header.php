@@ -1,7 +1,8 @@
 <?php
 ob_start();
 session_start();
-require "config/config.php";
+include "config/config.php";
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
@@ -31,6 +32,8 @@ $current_page = substr($_SERVER['SCRIPT_FILENAME'],strrpos($_SERVER['SCRIPT_FILE
         <link rel="stylesheet" href="<?php echo BASE_URL; ?>dist-front/css/meanmenu.css">
         <link rel="stylesheet" href="<?php echo BASE_URL; ?>dist-front/css/spacing.css">
         <link rel="stylesheet" href="<?php echo BASE_URL; ?>dist-front/css/style.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL ?>dist-front/css/iziToast.min.css">
+
         
         <!-- All Javascripts -->
         <script src="<?php echo BASE_URL; ?>dist-front/js/jquery-3.7.1.min.js"></script>
@@ -45,6 +48,7 @@ $current_page = substr($_SERVER['SCRIPT_FILENAME'],strrpos($_SERVER['SCRIPT_FILE
         <script src="<?php echo BASE_URL; ?>dist-front/js/counterup.min.js"></script>
         <script src="<?php echo BASE_URL; ?>dist-front/js/multi-countdown.js"></script>
         <script src="<?php echo BASE_URL; ?>dist-front/js/jquery.meanmenu.js"></script>
+        <script src="<?php echo BASE_URL ?>dist-admin/js/iziToast.min.js"></script>
 
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     </head>
@@ -64,7 +68,7 @@ $current_page = substr($_SERVER['SCRIPT_FILENAME'],strrpos($_SERVER['SCRIPT_FILE
                                 <a href="login.php"><i class="fas fa-sign-in-alt"></i> Login</a>
                             </li>
                             <li class="menu">
-                                <a href="register.php"><i class="fas fa-user"></i> Sign Up</a>
+                                <a href="<?= BASE_URL?>register"><i class="fas fa-user"></i> Sign Up</a>
                             </li>
                         </ul>
                     </div>

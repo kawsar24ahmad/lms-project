@@ -1,7 +1,9 @@
 <?php include "./layouts/top.php";
 
 if (isset($_SESSION['admin'])) {
+    $_SESSION['error'] = "You are already logged in";
     header('location: '. ADMIN_URL. 'dashboard.php');
+    exit;
 }
 
 if (isset($_POST['form_login'])) {
