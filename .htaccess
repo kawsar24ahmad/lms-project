@@ -1,0 +1,3 @@
+ReWriteEngine On
+
+ReWriteRule ^about$   about.php    [L]

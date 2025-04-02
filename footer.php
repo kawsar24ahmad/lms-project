@@ -1,15 +1,15 @@
-        <div class="footer pt_70">
+<div class="footer pt_70">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-3 col-md-6">
                         <div class="item pb_50">
                             <h2 class="heading">Navigate</h2>
                             <ul class="useful-links">
-                                <li><a href="index.html"><i class="fas fa-angle-right"></i> Home</a></li>
-                                <li><a href="courses.html"><i class="fas fa-angle-right"></i> Courses</a></li>
-                                <li><a href="instructors.html"><i class="fas fa-angle-right"></i> Instructors</a></li>
-                                <li><a href="terms.html"><i class="fas fa-angle-right"></i> Terms & Conditions</a></li>
-                                <li><a href="privacy.html"><i class="fas fa-angle-right"></i> Privacy Policy</a></li>
+                                <li><a href="<?= BASE_URL; ?>"><i class="fas fa-angle-right"></i> Home</a></li>
+                                <li><a href="courses.php"><i class="fas fa-angle-right"></i> Courses</a></li>
+                                <li><a href="instructors.php"><i class="fas fa-angle-right"></i> Instructors</a></li>
+                                <li><a href="terms.php"><i class="fas fa-angle-right"></i> Terms & Conditions</a></li>
+                                <li><a href="privacy.php"><i class="fas fa-angle-right"></i> Privacy Policy</a></li>
                             </ul>
                         </div>
                     </div>
@@ -96,6 +96,6 @@
             <i class="fas fa-angle-up"></i>
         </div>
 
-        <script src="js/custom.js"></script>
+        <script src="<?= BASE_URL?>dist-front/js/custom.js"></script>
     </body>
 </html>
