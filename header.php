@@ -64,12 +64,22 @@ $current_page = substr($_SERVER['SCRIPT_FILENAME'],strrpos($_SERVER['SCRIPT_FILE
                     </div>
                     <div class="col-md-6 right-side">
                         <ul class="right">
+                            <?php if(isset($_SESSION['student'])):?>
+                                <li class="menu">
+                                 <a href="<?=BASE_URL?>student-dashboard"><i class="fas fa-sign-in-alt"></i> Student Dashboard</a>
+                                </li>
+                            <?php elseif(isset($_SESSION['instructor'])):?>
+                                <li class="menu">
+                                 <a href="<?=BASE_URL?>student-dashboard"><i class="fas fa-sign-in-alt"></i> Instructor Dashboard</a>
+                                </li>
+                            <?php else:?>
                             <li class="menu">
                                 <a href="login.php"><i class="fas fa-sign-in-alt"></i> Login</a>
                             </li>
                             <li class="menu">
                                 <a href="<?= BASE_URL?>register"><i class="fas fa-user"></i> Sign Up</a>
                             </li>
+                            <?php endif;?>
                         </ul>
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 <?php include "header.php";
-if (!isset($_SESSION['student'])) {
+if (!isset($_SESSION['instructor'])) {
     $_SESSION['error'] = "Login first";
     header("location:" . BASE_URL . 'login');
     exit;
@@ -28,12 +28,12 @@ if (!isset($_SESSION['student'])) {
         <div class="row">
             <div class="col-lg-3 col-md-12">
                 <div class="card">
-                    <?php include "student-sidebar.php" ?>
+                    <?php include "instructor-sidebar.php" ?>
 
                 </div>
             </div>
             <div class="col-lg-9 col-md-12">
-                <h3 class="mb_20">Hello, <?= strtoupper($_SESSION['student']['name']); ?></h3>
+                <h3 class="mb_20">Hello, <?= strtoupper($_SESSION['instructor']['name']); ?></h3>
                 <div class="row box-items">
                     <div class="col-md-4">
                         <div class="box1">

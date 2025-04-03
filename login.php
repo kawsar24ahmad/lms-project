@@ -5,6 +5,12 @@ if (isset($_SESSION['student'])) {
     header("location:". BASE_URL.'student-dashboard');
     exit;
 }
+if (isset($_SESSION['instructor'])) {
+    $_SESSION['error'] = "You are already logged in";
+    header("location:". BASE_URL.'student-dashboard');
+    exit;
+}
+// student login 
 if (isset($_POST['form_student'])) {
     try {
         if ($_POST['email'] == '') {
@@ -32,6 +38,39 @@ if (isset($_POST['form_student'])) {
             $_SESSION['student'] = $result;
             $_SESSION['success'] = "you have Logged in successfully";
             header('location: '. BASE_URL .'student-dashboard');
+            exit;
+        }
+    } catch(Exception $e) {
+        $_SESSION['error'] = $e->getMessage();
+    }
+}
+if (isset($_POST['form_instructor'])) {
+    try {
+        if ($_POST['email'] == '') {
+            throw new Exception("Email can not be empty");
+        }
+        if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+            throw new Exception("Email is unvalid!");
+        }
+        if ($_POST['password'] == '') {
+            throw new Exception("password can not be empty");
+        }
+        $q = $pdo->prepare("select * from instructors where email=? and status =?");
+        $q->execute([
+            $_POST['email'],
+            1
+        ]);
+        $total = $q->rowCount();
+        if (!$total) {
+            throw new Exception("Email is not found");
+        }else{
+            $result = $q->fetch(PDO::FETCH_ASSOC);
+            if (!password_verify($_POST['password'], $result['password'])) {
+                throw new Exception("Password does not match");
+            }
+            $_SESSION['instructor'] = $result;
+            $_SESSION['success'] = "you have Logged in successfully";
+            header('location: '. BASE_URL .'instructor-dashboard');
             exit;
         }
     } catch(Exception $e) {
@@ -76,7 +115,7 @@ if (isset($_POST['form_student'])) {
                         <!-- form content -->
                         <form action="" method="post">
                             <div class="login-form">
-                                <form action="<?= BASE_URL ?>student-dashboard" method="post">
+                                <form action="" method="post">
                                     <div class="mb-3">
                                         <label for="" class="form-label">Email Address</label>
                                         <input type="text" class="form-control" name="email">
@@ -102,24 +141,24 @@ if (isset($_POST['form_student'])) {
                     <div class="tab-pane fade" id="instructor" role="tabpanel" aria-labelledby="instructor-tab" tabindex="0">
                         <!-- form content -->
                         <div class="login-form">
-                            <form action="instructor-dashboard.php" method="post">
+                            <form action="" method="post">
                                 <div class="mb-3">
                                     <label for="" class="form-label">Email Address</label>
-                                    <input type="text" class="form-control">
+                                    <input type="email" class="form-control" name="email">
                                 </div>
                                 <div class="mb-3">
                                     <label for="" class="form-label">Password</label>
-                                    <input type="password" class="form-control">
+                                    <input type="password" class="form-control" name="password">
                                 </div>
                                 <div class="mb-3">
-                                    <button type="submit" class="btn btn-primary bg-website">
+                                    <button type="submit" class="btn btn-primary bg-website" name="form_instructor">
                                         Login
                                     </button>
-                                    <a href="forget-password.php" class="primary-color">Forget Password?</a>
+                                    <a href="<?=BASE_URL?>forget-password" class="primary-color">Forget Password?</a>
                                 </div>
                             </form>
                             <div class="mb-3">
-                                <a href="register.php" class="primary-color">Don't have an account? Create Account</a>
+                                <a href="<?=BASE_URL?>register" class="primary-color">Don't have an account? Create Account</a>
                             </div>
                         </div>
                         <!-- // form content -->
