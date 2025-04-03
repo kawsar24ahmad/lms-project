@@ -21,6 +21,6 @@
         <a href="<?= BASE_URL ?>student-profile">Edit Profile</a>
     </li>
     <li class="list-group-item">
-        <a href="<?= BASE_URL ?>logout">Logout</a>
+        <a href="<?= BASE_URL ?>student-logout">Logout</a>
     </li>
 </ul>

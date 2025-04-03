@@ -1,9 +1,10 @@
 <?php include "header.php";
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-
+// student form 
 if (isset($_POST['form_student'])) {
     try {
         if ($_POST['name'] == "") {
@@ -15,14 +16,14 @@ if (isset($_POST['form_student'])) {
         if (!filter_var($_POST['email'], FILTER_SANITIZE_EMAIL)) {
             throw new Exception("email in not valid");
         }
-        if ($_POST['password'] == ""|| $_POST['confirm_password'] == "") {
+        if ($_POST['password'] == "" || $_POST['confirm_password'] == "") {
             throw new Exception("passwords field can not be empty");
         }
         if ($_POST['password'] != $_POST['confirm_password']) {
             throw new Exception("passwords does not match");
         }
         $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        $token = hash("sha256", time(). random_bytes(16));
+        $token = hash("sha256", time() . random_bytes(16));
         $statement = $pdo->prepare("insert into students (name, email, password, token, status) values (?,?,?,?,?)");
         $statement->execute([
             $_POST['name'],
@@ -31,9 +32,9 @@ if (isset($_POST['form_student'])) {
             $token,
             0
         ]);
-        $link = BASE_URL.'registration-verify.php?email='.$_POST['email'].'&token='.$token;
+        $link = BASE_URL . 'student-registration-verify.php?email=' . $_POST['email'] . '&token=' . $token;
         $email_message = 'Please click on this link to verify registration: <br>';
-        $email_message .= '<a href="'.$link.'">Click Here</a>';
+        $email_message .= '<a href="' . $link . '">Click Here</a>';
 
         $mail = new PHPMailer(true);
         try {
@@ -52,16 +53,80 @@ if (isset($_POST['form_student'])) {
             $mail->send();
             $success_message = 'Registration is completed. An email is sent to your email address. Please check that and verify the registration.';
             $_SESSION['success'] = $success_message;
-            header('location:'. BASE_URL.'register');
+            header('location:' . BASE_URL . 'register');
             exit;
-
         } catch (Exception $e) {
             $_SESSION['error'] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
         }
-    } catch(Exception $e) {
+    } catch (Exception $e) {
         $error_message = $e->getMessage();
         $_SESSION['error'] = $error_message;
-        header('location:'. BASE_URL.'register');
+        header('location:' . BASE_URL . 'register');
+        exit;
+    }
+}
+// instructor form 
+if (isset($_POST['form_instructor'])) {
+    try {
+        if ($_POST['name'] == "") {
+            throw new Exception("Name field can not be empty");
+        }
+        if ($_POST['designation'] == "") {
+            throw new Exception("designation field can not be empty");
+        }
+        if ($_POST['email'] == "") {
+            throw new Exception("email field can not be empty");
+        }
+        if (!filter_var($_POST['email'], FILTER_SANITIZE_EMAIL)) {
+            throw new Exception("email in not valid");
+        }
+        if ($_POST['password'] == "" || $_POST['confirm_password'] == "") {
+            throw new Exception("passwords field can not be empty");
+        }
+        if ($_POST['password'] != $_POST['confirm_password']) {
+            throw new Exception("passwords does not match");
+        }
+        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        $token = hash("sha256", time() . random_bytes(16));
+        $statement = $pdo->prepare("insert into instructors (name, designation, email, password, token, status) values (?,?,?,?,?,?)");
+        $statement->execute([
+            $_POST['name'],
+            $_POST['designation'],
+            $_POST['email'],
+            $password,
+            $token,
+            0
+        ]);
+        $link = BASE_URL . 'instructor-registration-verify.php?email=' . $_POST['email'] . '&token=' . $token;
+        $email_message = 'Please click on this link to verify registration: <br>';
+        $email_message .= '<a href="' . $link . '">Click Here</a>';
+
+        $mail = new PHPMailer(true);
+        try {
+            $mail->isSMTP();
+            $mail->Host = SMTP_HOST;
+            $mail->SMTPAuth = true;
+            $mail->Username = SMTP_USERNAME;
+            $mail->Password = SMTP_PASSWORD;
+            $mail->SMTPSecure = SMTP_ENCRYPTION;
+            $mail->Port = 2525;
+            $mail->setFrom(SMTP_FORM);
+            $mail->addAddress($_POST['email']);
+            $mail->isHTML(true);
+            $mail->Subject = 'Registration Verification Email';
+            $mail->Body = $email_message;
+            $mail->send();
+            $success_message = 'Registration is completed. An email is sent to your email address. Please check that and verify the registration.';
+            $_SESSION['success'] = $success_message;
+            header('location:' . BASE_URL . 'register');
+            exit;
+        } catch (Exception $e) {
+            $_SESSION['error'] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+        }
+    } catch (Exception $e) {
+        $error_message = $e->getMessage();
+        $_SESSION['error'] = $error_message;
+        header('location:' . BASE_URL . 'register');
         exit;
     }
 }
@@ -113,7 +178,7 @@ if (isset($_POST['form_student'])) {
                                     <label for="" class="form-label">Email Address *</label>
                                     <input type="text" class="form-control" name="email">
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label for="" class="form-label">Password *</label>
                                     <input type="password" class="form-control" name="password">
@@ -136,36 +201,38 @@ if (isset($_POST['form_student'])) {
                     </div>
                     <div class="tab-pane fade" id="instructor" role="tabpanel" aria-labelledby="instructor-tab" tabindex="0">
                         <!-- form content -->
-                        <div class="login-form">
-                            <div class="mb-3">
-                                <label for="" class="form-label">Name *</label>
-                                <input type="text" class="form-control">
+                        <form action="" method="post">
+                            <div class="login-form">
+                                <div class="mb-3">
+                                    <label for="" class="form-label">Name *</label>
+                                    <input type="text" class="form-control" name="name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="" class="form-label">Designation *</label>
+                                    <input type="text" class="form-control" name="designation">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="" class="form-label">Email Address *</label>
+                                    <input type="email" class="form-control" name="email">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="" class="form-label">Password *</label>
+                                    <input type="password" class="form-control" name="password">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="" class="form-label">Confirm Password *</label>
+                                    <input type="password" class="form-control" name="confirm_password">
+                                </div>
+                                <div class="mb-3">
+                                    <button type="submit" class="btn btn-primary bg-website" name="form_instructor">
+                                        Create Account
+                                    </button>
+                                </div>
+                                <div class="mb-3">
+                                    <a href="<?=BASE_URL?>login" class="primary-color">Existing User? Login Now</a>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="" class="form-label">Designation *</label>
-                                <input type="text" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <label for="" class="form-label">Email Address *</label>
-                                <input type="text" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <label for="" class="form-label">Password *</label>
-                                <input type="password" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <label for="" class="form-label">Confirm Password *</label>
-                                <input type="password" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <button type="submit" class="btn btn-primary bg-website">
-                                    Create Account
-                                </button>
-                            </div>
-                            <div class="mb-3">
-                                <a href="login.php" class="primary-color">Existing User? Login Now</a>
-                            </div>
-                        </div>
+                        </form>
                         <!-- // form content -->
                     </div>
                 </div>
