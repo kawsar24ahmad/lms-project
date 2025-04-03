@@ -1,6 +1,14 @@
 <?php include 'layouts/top.php';
 
 
+
+if (!isset($_SESSION['admin'])) {
+    $_SESSION['error'] ="Please Login first to access to dashboard";
+    header('location: '.ADMIN_URL.'login.php');
+    exit;
+}
+
+?>
 try {
     if (isset($_POST['form_update'])) {
         if ($_POST['full_name'] == "") {
