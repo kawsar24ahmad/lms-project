@@ -1,142 +1,191 @@
-<?php include "header.php";
+<?php
+
+use function PHPSTORM_META\elementType;
+
+ include "header.php";
 
 try {
-    if (isset($_POST['form_update'])) {
-        if ($_POST['name'] == "") {
-            throw new Exception("Name field cannot be empty!");
+    if (isset($_POST['form_submit'])) {
+        if (empty($_POST['title'])) {
+            throw new Exception("Title field cannot be empty!");
         }
-        if ($_POST['email'] == "") {
-            throw new Exception("Email field cannot be empty!");
+        if (empty($_POST['slug'])) {
+            throw new Exception("Slug field cannot be empty!");
         }
-        if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-            throw new Exception("Email is not valid!");
+        
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $_POST['slug'])) {
+            throw new Exception("Slug must contain only letters, numbers, hyphens, or underscores!");
         }
-        if ($_POST['designation'] == "") {
-            throw new Exception("designation field cannot be empty!");
+        
+        // Check if slug already exists
+        $statement = $pdo->prepare("SELECT * FROM courses WHERE slug = ?");
+        $statement->execute([$_POST['slug']]);
+        if ($statement->rowCount() > 0) {
+            throw new Exception("This slug already exists!");
         }
-        if ($_POST['phone'] == "") {
-            throw new Exception("phone field cannot be empty!");
+        
+        if (!isset($_POST['price']) || $_POST['price'] === "") {
+            throw new Exception("Price field cannot be empty!");
         }
-        if ($_POST['address'] == "") {
-            throw new Exception("address field cannot be empty!");
+        if (!is_numeric($_POST['price']) || $_POST['price'] < 0 || $_POST['price'] > 1000) {
+            throw new Exception("Price field must be a number between 0 and 1000!");
         }
-        if ($_POST['country'] == "") {
-            throw new Exception("country field cannot be empty!");
+        
+        // Validate old price only if it's set
+        if (!empty($_POST['old_price'])) {
+            if (!is_numeric($_POST['old_price']) || $_POST['old_price'] < 0 || $_POST['old_price'] > 1000) {
+                throw new Exception("Old price must be a number between 0 and 1000!");
+            }
         }
-        if ($_POST['state'] == "") {
-            throw new Exception("state field cannot be empty!");
+        
+        if (empty($_POST['description'])) {
+            throw new Exception("Description field cannot be empty!");
         }
-        if ($_POST['zip_code'] == "") {
-            throw new Exception("zip code field cannot be empty!");
+        if (empty($_POST['category_id'])) {
+            throw new Exception("Category ID cannot be empty!");
         }
-        if ($_POST['city'] == "") {
-            throw new Exception("city field cannot be empty!");
+        if (empty($_POST['label_id'])) {
+            throw new Exception("Label ID cannot be empty!");
+        }
+        if (empty($_POST['language_id'])) {
+            throw new Exception("Language ID cannot be empty!");
         }
 
-        $statement = $pdo->prepare("UPDATE instructors SET
-                name=?, 
-                email =?,
-                designation =?,
-                phone=?,
-                address=?,
-                country=?,
-                zip_code=?,
-                city=?,
-                state=?,
-                website=?,
-                biography=?,
-                facebook=?,
-                twitter=?,
-                instagram=?,
-                youtube=?
-                WHERE id = ?");
+        // photo upload 
+
+        $path = $_FILES['featured_banner']['name'];
+        $tmp_path = $_FILES['featured_banner']['tmp_name'];
+
+        if ($path == "") {
+            throw new Exception("You must Upload a photo", 1);
+        }else{
+            $result = explode('.', $path);
+            $extension= $result[1];
+            $file_name = "course_featured_banner_". time(). '.'. $extension;
+            
+            $finfo  = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_file($finfo, $tmp_path);
+            if ($mime !=  "image/png" && $mime !=  "image/jpeg" && $mime != 'image/gif' ) {
+                throw new Exception("please upload a valid image");
+            }        
+        }
+        
+        
+        if (empty($_POST['featured_video_type'])) {
+            throw new Exception("Please select featured video type!");
+        }
+        if ($_POST['featured_video_type'] == "youtube") {
+            if (empty($_POST['featured_video_content_youtube'])) {
+                throw new Exception("You must give youtube content!");
+            }
+        }
+        elseif ($_POST['featured_video_type'] == "vimeo") {
+            if (empty($_POST['featured_video_content_vimeo'])) {
+                throw new Exception("You must give vimeo content!");
+            }
+        }
+        else{
+            $path_mp4 = $_FILES['featured_video_content_mp4']['name'];
+            $tmp_path_mp4 = $_FILES['featured_video_content_mp4']['tmp_name'];
+
+            if ($path_mp4 == "") {
+                throw new Exception("You must Upload a mp4 video");
+            }
+            $result = explode('.', $path_mp4);
+            $extension= $result[1];
+            $file_name_mp4 = "course_featured_video_". time(). '.'. $extension;
+            
+            $finfo  = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_file($finfo, $tmp_path_mp4);
+            if ($mime !=  "video/mp4" ) {
+                throw new Exception("please upload a valid video");
+            }   
+        }
+
+        move_uploaded_file($tmp_path, "uploads/". $file_name);
+
+
+        if ($_POST['featured_video_type'] == "youtube"){
+            $featured_video_content = $_POST['featured_video_content_youtube'];
+        }
+        if ($_POST['featured_video_type'] == "vimeo"){
+            $featured_video_content = $_POST['featured_video_content_vimeo'];
+        }
+        if ($_POST['featured_video_type'] == "mp4"){
+            $featured_video_content = $file_name_mp4;
+            move_uploaded_file($tmp_path_mp4, "uploads/". $file_name_mp4);
+        }
+
+        // sql
+
+        $statement = $pdo->prepare("insert into courses (
+            title,
+            slug,
+            description,
+            price,
+            old_price,
+            category_id,
+            label_id,
+            language_id,
+            instructor_id,
+            total_student,
+            total_rating,
+            total_rating_score,
+            avarage_rating,
+            featured_banner,
+            featured_video_type,
+            featured_video_content,
+            total_video_hours,
+            total_videos,
+            total_resources,
+            status,
+            updated_at
+        ) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+
         $statement->execute([
-            $_POST['name'],
-            $_POST['email'],
-            $_POST['designation'],
-            $_POST['phone'],
-            $_POST['address'],
-            $_POST['country'],
-            $_POST['zip_code'],
-            $_POST['city'],
-            $_POST['state'],
-            $_POST['website'],
-            $_POST['biography'],
-            $_POST['facebook'],
-            $_POST['twitter'],
-            $_POST['instagram'],
-            $_POST['youtube'],
-            $_SESSION['instructor']['id']
+            $_POST['title'],
+            $_POST['slug'],
+            $_POST['description'],
+            $_POST['price'],
+            $_POST['old_price'],
+            $_POST['category_id'],
+            $_POST['label_id'],
+            $_POST['language_id'],
+            $_SESSION['instructor']['id'],
+            0,
+            0,
+            0,
+            0,
+            $file_name,
+            $_POST['featured_video_type'],
+            $featured_video_content,
+            0,
+            0,
+            0,
+            "pending",
+            date('Y-m-d H:i:s'),
         ]);
 
-        $_SESSION['instructor']['name'] = $_POST['name'];
-        $_SESSION['instructor']['email'] = $_POST['email'];
-        $_SESSION['instructor']['designation'] = $_POST['designation'];
-        $_SESSION['instructor']['phone'] = $_POST['phone'];
-        $_SESSION['instructor']['address'] = $_POST['address'];
-        $_SESSION['instructor']['country'] = $_POST['country'];
-        $_SESSION['instructor']['zip_code'] = $_POST['zip_code'];
-        $_SESSION['instructor']['city'] = $_POST['city'];
-        $_SESSION['instructor']['state'] = $_POST['state'];
-        $_SESSION['instructor']['website'] = $_POST['website'];
-        $_SESSION['instructor']['biography'] = $_POST['biography'];
-        $_SESSION['instructor']['facebook'] = $_POST['facebook'];
-        $_SESSION['instructor']['twitter'] = $_POST['twitter'];
-        $_SESSION['instructor']['instagram'] = $_POST['instagram'];
-        $_SESSION['instructor']['youtube'] = $_POST['youtube'];
-
-        // update password 
-        if (!empty($_POST['new_password']) || !empty($_POST['retype_password'])) {
-            if ($_POST['new_password'] !== $_POST['retype_password']) {
-                throw new Exception("Passwords do not match");
-            }
-            $password = password_hash($_POST['new_password'], PASSWORD_DEFAULT);
-            $statement = $pdo->prepare("UPDATE instructors SET password = ? WHERE id = ?");
-            $statement->execute([
-                $password,
-                $_SESSION['instructor']['id']
-            ]);
-        }
-
-        // Upload photo
-        if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
-            $tmp_path = $_FILES['photo']['tmp_name'];
-
-            if (empty($tmp_path) || !file_exists($tmp_path)) {
-                throw new Exception("Temporary file path is empty or file does not exist!");
-            }
-
-            $extension = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
-            $file_name = time() . '.' . $extension;
-
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            if (!$finfo) {
-                throw new Exception("Failed to initialize file info!");
-            }
-
-            $mime = finfo_file($finfo, $tmp_path);
-            finfo_close($finfo);
-
-            if ($mime === "image/png" || $mime === "image/jpeg") {
-                if (!empty($_SESSION['instructor']['photo'])) {
-                    unlink('uploads/' . $_SESSION['instructor']['photo']);
-                }
-
-                if (move_uploaded_file($tmp_path, "uploads/" . $file_name)) {
-                    $statement = $pdo->prepare("UPDATE instructors SET photo = ? WHERE id = ?");
-                    $statement->execute([$file_name, $_SESSION['instructor']['id']]);
-                    $_SESSION['instructor']['photo'] = $file_name;
-                } else {
-                    throw new Exception("Failed to upload photo.");
-                }
-            } else {
-                throw new Exception("Please upload a valid photo (JPEG or PNG).");
-            }
-        }
-        $_SESSION['success'] = "profile updated successfully";
+        
+          
+        $_SESSION['success'] = "Course is created successfully";
+        header("location:". BASE_URL. 'instructor-course-create');
+        exit;
     }
-} catch (Exception $e) {
+}
+ catch (Exception $e) {
+    $_SESSION['title'] = $_POST['title'];
+    $_SESSION['slug'] = $_POST['slug'];
+    $_SESSION['price'] = $_POST['price'];
+    $_SESSION['old_price'] = $_POST['old_price'];
+    $_SESSION['description'] = $_POST['description'];
+    $_SESSION['category_id'] = $_POST['category_id'];
+    $_SESSION['label_id'] = $_POST['label_id'];
+    $_SESSION['language_id'] = $_POST['language_id'];
+
     $_SESSION['error'] = $e->getMessage();
+    header("location:". BASE_URL. 'instructor-course-create');
+    exit;
 }
 
 
@@ -172,25 +221,25 @@ try {
                         <div class="col-md-12 mb-3">
                             <label for="">Title *</label>
                             <div class="form-group">
-                                <input type="text" name="title" class="form-control" value="">
+                                <input type="text" name="title" class="form-control" value="<?php if(isset($_SESSION['title'])){echo $_SESSION['title']; unset($_SESSION['title']);} ?>">
                             </div>
                         </div>
                         <div class="col-md-12 mb-3">
                             <label for="">slug *</label>
                             <div class="form-group">
-                                <input type="text" name="slug" class="form-control" value="">
+                                <input type="text" name="slug" class="form-control" value="<?php if(isset($_SESSION['slug'])){echo $_SESSION['slug']; unset($_SESSION['slug']);} ?>">
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="">price *</label>
                             <div class="form-group">
-                                <input type="text" name="price" class="form-control" value="">
+                                <input type="text" name="price" class="form-control" value="<?php if(isset($_SESSION['price'])){echo $_SESSION['price']; unset($_SESSION['price']);} ?>">
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="">Old price </label>
                             <div class="form-group">
-                                <input type="text" name="old_price" class="form-control" value="">
+                                <input type="text" name="old_price" class="form-control" value="<?php if(isset($_SESSION['old_price'])){echo $_SESSION['old_price']; unset($_SESSION['old_price']);} ?>">
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
@@ -204,7 +253,12 @@ try {
                                     
                                     $result = $statement->fetchAll(PDO::FETCH_ASSOC);
                                     foreach ($result as $row) {?>
-                                       <option value="<?= $row['id'];?>"><?= $row['name'];?></option>
+                                       <option value="<?= $row['id'];?>"  <?php if(isset($_SESSION['category_id'])){
+                                        if ($row['id'] == $_SESSION['category_id']) {
+                                            echo 'selected';
+                                            unset($_SESSION['category_id']);
+                                        }
+                                       } ?>><?= $row['name'];?></option>
                                    <?php }
                                     ?>
                                     
@@ -222,7 +276,12 @@ try {
                                     
                                     $result = $statement->fetchAll(PDO::FETCH_ASSOC);
                                     foreach ($result as $row) {?>
-                                       <option value="<?= $row['id'];?>"><?= $row['name'];?></option>
+                                       <option value="<?= $row['id'];?>" <?php if(isset($_SESSION['label_id'])){
+                                        if ($row['id'] == $_SESSION['label_id']) {
+                                            echo 'selected';
+                                            unset($_SESSION['label_id']);
+                                        }
+                                       } ?>><?= $row['name'];?></option>
                                    <?php }
                                     ?>
                                     
@@ -240,11 +299,22 @@ try {
                                     
                                     $result = $statement->fetchAll(PDO::FETCH_ASSOC);
                                     foreach ($result as $row) {?>
-                                       <option value="<?= $row['id'];?>"><?= $row['name'];?></option>
+                                       <option value="<?= $row['id'];?>" <?php if(isset($_SESSION['language_id'])){
+                                        if ($row['id'] == $_SESSION['language_id']) {
+                                            echo 'selected';
+                                            unset($_SESSION['language_id']);
+                                        }
+                                       } ?>><?= $row['name'];?></option>
                                    <?php }
                                     ?>
                                     
                                 </select>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="">Description </label>
+                            <div class="form-group">
+                                <textarea class="form-control editor" name="description"><?php if(isset($_SESSION['description'])){echo $_SESSION['description']; unset($_SESSION['description']);} ?></textarea>
                             </div>
                         </div>
                         <div class="col-md-12 mb-3">
@@ -267,32 +337,27 @@ try {
                             </div>
                         </div>
                         <div class="col-md-6 mb-3" style="display: none;" id="youtube">
-                            <label for="">Featured video content *</label>
+                            <label for="">Featured video content (Youtube) *</label>
                             <div class="form-group">
                                 <input type="text" name="featured_video_content_youtube" class="form-control" value="">
                             </div>
                         </div>
                         <div class="col-md-6 mb-3" style="display: none;" id="vimeo">
-                            <label for="">Featured video content *</label>
+                            <label for="">Featured video content (Vimeo) *</label>
                             <div class="form-group">
                                 <input type="text" name="featured_video_content_vimeo" class="form-control" value="">
                             </div>
                         </div>
                         <div class="col-md-6 mb-3" style="display: none;" id="mp4">
-                            <label for="">Featured video content *</label>
+                            <label for="">Featured video content (MP4) *</label>
                             <div class="form-group">
                                 <input type="file" name="featured_video_content_mp4">
                             </div>
                         </div>
-                        <div class="col-12 mb-3">
-                            <label for="">Description </label>
+                        
+                        <div class="col-md-12">
                             <div class="form-group">
-                                <textarea class="form-control editor" name="description"></textarea>
-                            </div>
-                        </div>
-                        <div class="col-mdt
-                            <div class="form-group">
-                                <input name="form_update" type="submit" class="btn btn-primary" value="Update">
+                                <input name="form_submit" type="submit" class="btn btn-primary" >
                             </div>
                         </div>
                     </div>
