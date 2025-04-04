@@ -49,6 +49,7 @@ $current_page = substr($_SERVER['SCRIPT_FILENAME'],strrpos($_SERVER['SCRIPT_FILE
         <script src="<?php echo BASE_URL; ?>dist-front/js/multi-countdown.js"></script>
         <script src="<?php echo BASE_URL; ?>dist-front/js/jquery.meanmenu.js"></script>
         <script src="<?php echo BASE_URL ?>dist-admin/js/iziToast.min.js"></script>
+        <script src="<?php echo BASE_URL ?>dist-front/tinymce/tinymce.min.js"></script>
 
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     </head>

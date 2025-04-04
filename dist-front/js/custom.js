@@ -218,4 +218,9 @@
 
     $('.counter').counterUp();
 
+    tinymce.init({
+        selector: '.editor',
+        height : '300'
+    });
+
 })(jQuery);
