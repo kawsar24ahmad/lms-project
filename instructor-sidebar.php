@@ -6,6 +6,9 @@
     <li class="list-group-item <?= ($current_page == 'instructor-profile.php') ? 'active' : '' ?>">
         <a href="<?= BASE_URL ?>instructor-profile">Edit Profile</a>
     </li>
+    <li class="list-group-item <?= ($current_page == 'instructor-courses.php') ? 'active' : '' ?>">
+        <a href="<?= BASE_URL ?>instructor-courses">All Courses</a>
+    </li>
     <li class="list-group-item <?= ($current_page == 'instructor-course-create.php') ? 'active' : '' ?>">
         <a href="<?= BASE_URL ?>instructor-course-create"> Create Course</a>
     </li>

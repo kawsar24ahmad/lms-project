@@ -1,7 +1,4 @@
 <?php
-
-use function PHPSTORM_META\elementType;
-
  include "header.php";
 
 try {
@@ -51,7 +48,7 @@ try {
             throw new Exception("Language ID cannot be empty!");
         }
 
-        // photo upload 
+        // featured banner upload 
 
         $path = $_FILES['featured_banner']['name'];
         $tmp_path = $_FILES['featured_banner']['tmp_name'];
@@ -65,6 +62,24 @@ try {
             
             $finfo  = finfo_open(FILEINFO_MIME_TYPE);
             $mime = finfo_file($finfo, $tmp_path);
+            if ($mime !=  "image/png" && $mime !=  "image/jpeg" && $mime != 'image/gif' ) {
+                throw new Exception("please upload a valid image");
+            }        
+        }
+        // featured_photo upload 
+
+        $path2 = $_FILES['featured_photo']['name'];
+        $tmp_path2 = $_FILES['featured_photo']['tmp_name'];
+
+        if ($path2 == "") {
+            throw new Exception("You must Upload a photo", 1);
+        }else{
+            $result = explode('.', $path2);
+            $extension2= $result[1];
+            $file_name2 = "course_featured_photo_". time(). '.'. $extension2;
+            
+            $finfo  = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_file($finfo, $tmp_path2);
             if ($mime !=  "image/png" && $mime !=  "image/jpeg" && $mime != 'image/gif' ) {
                 throw new Exception("please upload a valid image");
             }        
@@ -103,6 +118,7 @@ try {
         }
 
         move_uploaded_file($tmp_path, "uploads/". $file_name);
+        move_uploaded_file($tmp_path2, "uploads/". $file_name2);
 
 
         if ($_POST['featured_video_type'] == "youtube"){
@@ -133,6 +149,7 @@ try {
             total_rating_score,
             avarage_rating,
             featured_banner,
+            featured_photo,
             featured_video_type,
             featured_video_content,
             total_video_hours,
@@ -140,7 +157,7 @@ try {
             total_resources,
             status,
             updated_at
-        ) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        ) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
         $statement->execute([
             $_POST['title'],
@@ -157,6 +174,7 @@ try {
             0,
             0,
             $file_name,
+            $file_name2,
             $_POST['featured_video_type'],
             $featured_video_content,
             0,
@@ -317,10 +335,16 @@ try {
                                 <textarea class="form-control editor" name="description"><?php if(isset($_SESSION['description'])){echo $_SESSION['description']; unset($_SESSION['description']);} ?></textarea>
                             </div>
                         </div>
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="">Featured Banner</label>
                             <div class="form-group">
                                 <input type="file" name="featured_banner">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="">Featured Photo</label>
+                            <div class="form-group">
+                                <input type="file" name="featured_photo">
                             </div>
                         </div>
 
