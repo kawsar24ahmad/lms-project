@@ -6,7 +6,14 @@
     <li class="list-group-item <?= ($current_page == 'instructor-profile.php') ? 'active' : '' ?>">
         <a href="<?= BASE_URL ?>instructor-profile">Edit Profile</a>
     </li>
-    <li class="list-group-item <?= ($current_page == 'instructor-courses.php') ? 'active' : '' ?>">
+    <li class="list-group-item <?= (
+        $current_page == 'instructor-courses.php' || 
+        $current_page ==  'instructor-course-edit-basic.php'  ||
+        $current_page ==  'instructor-course-edit-featured-photo.php' ||
+        $current_page ==  'instructor-course-edit-featured-banner.php' ||
+        $current_page ==  'instructor-course-edit-featured-video.php' ||
+        $current_page ==  'instructor-course-edit-curriculum.php'
+    ) ? 'active' : '' ?>">
         <a href="<?= BASE_URL ?>instructor-courses">All Courses</a>
     </li>
     <li class="list-group-item <?= ($current_page == 'instructor-course-create.php') ? 'active' : '' ?>">

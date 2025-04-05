@@ -1,6 +1,10 @@
 <?php
  include "header.php";
-
+ if (!isset($_SESSION['instructor'])) {
+    $_SESSION['error'] = "Login first";
+    header("location:" . BASE_URL . 'login');
+    exit;
+}
 try {
     if (isset($_POST['form_submit'])) {
         if (empty($_POST['title'])) {

@@ -13,7 +13,6 @@ ReWriteRule ^instructor-logout$                instructor-logout.php           [
 ReWriteRule ^instructor-profile$                instructor-profile.php           [L]
 ReWriteRule ^instructor-course-create$                instructor-course-create.php           [L]
 ReWriteRule ^instructor-courses$                instructor-courses.php           [L]
-ReWriteRule ^instructor-course-edit/(.*)$/?$                instructor-course-edit.php?id=$1           [L]
 ReWriteRule ^instructor-course-edit-basic/(.*)$/?$                instructor-course-edit-basic.php?id=$1           [L]
 ReWriteRule ^instructor-course-edit-featured-photo/(.*)$/?$                instructor-course-edit-featured-photo.php?id=$1           [L]
 ReWriteRule ^instructor-course-edit-featured-banner/(.*)$/?$                instructor-course-edit-featured-banner.php?id=$1           [L]

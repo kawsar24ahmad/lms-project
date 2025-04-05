@@ -1,9 +1,14 @@
 <?php
 include "header.php";
-
-$statement = $pdo->prepare("select * from courses where id =?");
+if (!isset($_SESSION['instructor'])) {
+    $_SESSION['error'] = "Login first";
+    header("location:" . BASE_URL . 'login');
+    exit;
+}
+$statement = $pdo->prepare("select * from courses where id =? and instructor_id =?");
 $statement->execute([
-    $_REQUEST['id']
+   $_REQUEST['id'],
+   $_SESSION['instructor']['id']
 ]);
 $total = $statement->rowCount();
 if (!$total) {

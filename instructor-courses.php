@@ -49,26 +49,36 @@ if (!isset($_SESSION['instructor'])) {
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $statement = $pdo->prepare("select * from courses order by id desc");
-                                    $statement->execute();
-                                    $data = $statement->fetchAll(PDO::FETCH_ASSOC);
-                                    foreach ($data as $index => $row) { ?>
-                                        
-                              
-                                    <tr>
-                                        <td><?= $index + 1 ?></td>
-                                        <td><?= $row['title'] ?></td>
-                                        <td><img src="<?= BASE_URL. 'uploads/' . $row['featured_photo'] ?>" alt="" class="w-150"></td>
-                                        <td>$<?= $row['price'] ?></td>
-                                       
-                                        <td class="badge <?php echo ($row['status'] == 'pending' || $row['status'] == 'in_review' ) ? 'bg-danger' : 'bg-success' ?>"><?= $row['status'] ?></td>
-                                        <td class="pt_10 pb_10">
-                                            <a href="<?= BASE_URL?>instructor-course-edit/<?= $row['id'] ?>" class="btn btn-primary"><i class="fas fa-edit"></i></a>
-                                            <a href="" class="btn btn-danger" onClick="return confirm('Are you sure?');"><i class="fas fa-trash"></i></a>
-                                        </td>
-                                        
-                                    </tr>
-                                    <?php   }
+                                    $statement = $pdo->prepare("select * from courses where instructor_id = ? order by id desc");
+                                    $statement->execute([
+                                        $_SESSION['instructor']['id']
+                                    ]);
+
+                                    if ($statement->rowCount() > 0) {
+
+                                        $data = $statement->fetchAll(PDO::FETCH_ASSOC);
+                                        foreach ($data as $index => $row) { ?>
+
+
+                                            <tr>
+                                                <td><?= $index + 1 ?></td>
+                                                <td><?= $row['title'] ?></td>
+                                                <td><img src="<?= BASE_URL . 'uploads/' . $row['featured_photo'] ?>" alt="" class="w-150"></td>
+                                                <td>$<?= $row['price'] ?></td>
+
+                                                <td class="badge <?php echo ($row['status'] == 'pending' || $row['status'] == 'in_review') ? 'bg-danger' : 'bg-success' ?>"><?= $row['status'] ?></td>
+                                                <td class="pt_10 pb_10">
+                                                    <a href="<?= BASE_URL ?>instructor-course-edit-basic/<?= $row['id'] ?>" class="btn btn-primary"><i class="fas fa-edit"></i></a>
+                                                    <a href="" class="btn btn-danger" onClick="return confirm('Are you sure?');"><i class="fas fa-trash"></i></a>
+                                                </td>
+
+                                            </tr>
+                                        <?php   }
+                                    } else { ?>
+                                        <tr>
+                                            <td colspan="6">No items</td>
+                                        </tr>
+                                    <?php }
                                     ?>
                                 </tbody>
                             </table>
