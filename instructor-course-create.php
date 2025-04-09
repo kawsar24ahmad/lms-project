@@ -156,9 +156,9 @@ try {
             featured_photo,
             featured_video_type,
             featured_video_content,
-            total_video_hours,
-            total_videos,
-            total_resources,
+            total_video_second,
+            total_video,
+            total_resource,
             status,
             updated_at
         ) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");

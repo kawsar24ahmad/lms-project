@@ -17,4 +17,5 @@ ReWriteRule ^instructor-course-edit-basic/(.*)$/?$                instructor-cou
 ReWriteRule ^instructor-course-edit-featured-photo/(.*)$/?$                instructor-course-edit-featured-photo.php?id=$1           [L]
 ReWriteRule ^instructor-course-edit-featured-banner/(.*)$/?$                instructor-course-edit-featured-banner.php?id=$1           [L]
 ReWriteRule ^instructor-course-edit-featured-video/(.*)$/?$                instructor-course-edit-featured-video.php?id=$1           [L]
-ReWriteRule ^instructor-course-edit-curriculum/(.*)$/?$                instructor-course-edit-curriculum.php?id=$1           [L]
+ReWriteRule ^instructor-course-edit-curriculum/(.*)/?$                instructor-course-edit-curriculum.php?id=$1           [L]
+ReWriteRule ^instructor-course-edit-curriculum-lesson/([0-9]+)/([0-9]+)/?$                instructor-course-edit-curriculum-lesson.php?course_id=$1&module_id=$2        [L]

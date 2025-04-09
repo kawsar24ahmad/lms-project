@@ -30,7 +30,7 @@ try {
             throw new Exception("item_order field must be integer number!");
         }
 
-        $statement = $pdo->prepare("insert into modules (name, course_id, total_video, total_resource, total_hour, item_order) values (?,?,?,?,?,?)");
+        $statement = $pdo->prepare("insert into modules (name, course_id, total_video, total_resource, total_video_second, item_order) values (?,?,?,?,?,?)");
         $statement->execute([
             $_POST['name'],
             $_REQUEST['id'],
@@ -222,9 +222,13 @@ try {
                                                 <td><?= $row['name']; ?></td>
                                                 <td><?= $row['total_video']; ?></td>
                                                 <td><?= $row['total_resource']; ?></td>
-                                                <td><?= $row['total_hour']; ?></td>
+                                                <td><?= convertSecondsToMinutesHours($row['total_video_second']); ?></td>
                                                 <td><?= $row['item_order']; ?></td>
-                                                <td><a href="" class="btn btn-success">Lesson</a></td>
+                                                
+                                                <td>
+                                                    <a href="<?= BASE_URL ?>instructor-course-edit-curriculum-lesson/<?= $_REQUEST['id'] . '/'.$row['id'] ?>" class="btn btn-success">Lesson</a>
+                                                </td>
+
                                                 <td class="pt_10 pb_10">
                                                     <a href="" class="btn btn-primary"
                                                         data-bs-toggle="modal" data-bs-target="#editModule<?= $index ?>"><i class="fas fa-edit"></i></a>

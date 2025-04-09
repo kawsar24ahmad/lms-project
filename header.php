@@ -2,6 +2,7 @@
 ob_start();
 session_start();
 include "config/config.php";
+include "config/functions.php";
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
