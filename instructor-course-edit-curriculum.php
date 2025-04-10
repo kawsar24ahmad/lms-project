@@ -1,5 +1,16 @@
 <?php
 include "header.php";
+
+
+
+$full_url = 'http://'.$_SERVER['HTTP_HOST']. $_SERVER['REQUEST_URI'];
+$explode_result = explode("instructor-course-edit-curriculum", $full_url);
+$slashCount = substr_count($explode_result[1],"/");
+if ($slashCount > 1) {
+    header("location:" . BASE_URL . "instructor-courses");
+    exit;
+}
+
 if (!isset($_SESSION['instructor'])) {
     $_SESSION['error'] = "Login first";
     header("location:" . BASE_URL . 'login');
@@ -81,8 +92,38 @@ try {
 }
 try {
     if (isset($_POST['form_module_delete'])) {
+        // get lesson data 
+        $statement = $pdo->prepare("select * from lessons where module_id =?");
+        $statement->execute([$_POST['module_id']]);
+        $lessons = $statement->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($lessons as $lesson) {
+            if ($lesson['lesson_type'] == "video") {
+                if ($lesson['video_type']== "mp4") {
+                    unlink("uploads/". $lesson['video_content']);
+                }
+            }else{
+                unlink("uploads/". $lesson['resource_content']);
+            }    
+        }
+        $statement = $pdo->prepare("delete from lessons where module_id =?");
+        $statement->execute([$_POST['module_id']]);
+       
 
+        $statement = $pdo->prepare("select * from modules where id =?");
+        $statement->execute([$_POST['module_id']]);
+        $module_data = $statement->fetchAll(PDO::FETCH_ASSOC);
 
+        $statement = $pdo->prepare("select * from courses where id =?");
+        $statement->execute([$_POST['course_id']]);
+        $course_data = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+        $new_total_video = $course_data[0]['total_video']- $module_data[0]['total_video'];
+        $new_total_resource = $course_data[0]['total_resource']-$module_data[0]['total_resource'];
+        $new_total_video_second = $course_data[0]['total_video_second'] - $module_data[0]['total_video_second'];
+
+       $statement = $pdo->prepare("update courses set total_video_second =?, total_video =?, total_resource =? where id =?");
+       $statement->execute([$new_total_video_second, $new_total_video, $new_total_resource, $_POST['course_id']]);
+        
         $statement = $pdo->prepare("delete from modules where id=?");
         $statement->execute([
             $_POST['module_id']

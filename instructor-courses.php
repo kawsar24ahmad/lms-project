@@ -69,7 +69,7 @@ if (!isset($_SESSION['instructor'])) {
                                                 <td class="badge <?php echo ($row['status'] == 'pending' || $row['status'] == 'in_review') ? 'bg-danger' : 'bg-success' ?>"><?= $row['status'] ?></td>
                                                 <td class="pt_10 pb_10">
                                                     <a href="<?= BASE_URL ?>instructor-course-edit-basic/<?= $row['id'] ?>" class="btn btn-primary"><i class="fas fa-edit"></i></a>
-                                                    <a href="" class="btn btn-danger" onClick="return confirm('Are you sure?');"><i class="fas fa-trash"></i></a>
+                                                    <a href="<?=BASE_URL?>/instructor-course-delete/<?=$row['id']?>" class="btn btn-danger" onClick="return confirm('Are you sure?');"><i class="fas fa-trash"></i></a>
                                                 </td>
 
                                             </tr>

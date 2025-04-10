@@ -7,7 +7,7 @@ if (isset($_SESSION['student'])) {
 }
 if (isset($_SESSION['instructor'])) {
     $_SESSION['error'] = "You are already logged in";
-    header("location:". BASE_URL.'student-dashboard');
+    header("location:". BASE_URL.'instructor-dashboard');
     exit;
 }
 // student login 

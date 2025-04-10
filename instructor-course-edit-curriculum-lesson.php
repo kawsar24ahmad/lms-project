@@ -1,18 +1,30 @@
 <?php
 include "header.php";
+$full_url = 'http://'.$_SERVER['HTTP_HOST']. $_SERVER['REQUEST_URI'];
+$explode_result = explode("instructor-course-edit-curriculum-lesson", $full_url);
+$slashCount = substr_count($explode_result[1],"/");
+if ($slashCount > 2) {
+    header("location:" . BASE_URL . "instructor-courses");
+    exit;
+}
+
 if (!isset($_SESSION['instructor'])) {
     $_SESSION['error'] = "Login first";
     header("location:" . BASE_URL . 'login');
     exit;
 }
-$statement = $pdo->prepare("select * from courses where id =? and instructor_id =?");
+// echo "<pre>";
+
+
+
+$statement = $pdo->prepare("select * from modules where id =? and course_id =?");
 $statement->execute([
+    $_REQUEST['module_id'],
     $_REQUEST['course_id'],
-    $_SESSION['instructor']['id']
 ]);
 $total = $statement->rowCount();
 if (!$total) {
-    $_SESSION['error'] = "Course is not found!";
+    $_SESSION['error'] = "Lesson is not found!";
     header("location:" . BASE_URL . "instructor-courses");
     exit;
 }
@@ -206,7 +218,7 @@ try {
     exit;
 }
 try {
-    if (isset($_POST['form_module_edit'])) {
+    if (isset($_POST['form_lesson_edit'])) {
         if (empty($_POST['name'])) {
             throw new Exception("Name field cannot be empty!");
         }
@@ -217,38 +229,101 @@ try {
             throw new Exception("item_order field must be integer number!");
         }
 
-        $statement = $pdo->prepare("update modules set name=?, item_order=? where id=?");
+        $statement = $pdo->prepare("update lessons set name=?, is_preview =?, item_order=? where id=?");
         $statement->execute([
             $_POST['name'],
+            $_POST['is_preview'],
             $_POST['item_order'],
-            $_POST['module_id']
+            $_POST['lesson_id']
         ]);
 
 
-        $_SESSION['success'] = "Course module is updated successfully";
-        header("location:" . BASE_URL . 'instructor-course-edit-curriculum/' . $_POST['course_id']);
+        $_SESSION['success'] = "Lesson is updated successfully";
+        header("location:" . BASE_URL . 'instructor-course-edit-curriculum-lesson/' . $_POST['course_id'] . '/'. $_POST['module_id']);
         exit;
     }
 } catch (Exception $e) {
     $_SESSION['error'] = $e->getMessage();
-    header("location:" . BASE_URL . 'instructor-course-edit-curriculum/' .  $_POST['course_id']);
+    header("location:" . BASE_URL . 'instructor-course-edit-curriculum-lesson/' . $_POST['course_id'] . '/'. $_POST['module_id']);
     exit;
 }
 try {
-    if (isset($_POST['form_module_delete'])) {
-
-
-        $statement = $pdo->prepare("delete from modules where id=?");
+    if (isset($_POST['form_lesson_delete'])) {
+        $statement = $pdo->prepare("select * from lessons where id =?");
         $statement->execute([
-            $_POST['module_id']
+            $_POST['lesson_id'],
         ]);
-        $_SESSION['success'] = "Course module is deleted successfully";
-        header("location:" . BASE_URL . 'instructor-course-edit-curriculum/' . $_POST['course_id']);
+        $lesson_data = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+
+        $statement = $pdo->prepare("select * from modules where id =?");
+            $statement->execute([
+                $_POST['module_id']
+            ]);
+        $module_data = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($lesson_data[0]['lesson_type'] == "video") {
+            if ($lesson_data[0]['video_type'] == "mp4") {
+                unlink("uploads/". $lesson_data[0]['video_content']);
+            }
+            
+            $new_total_video = $module_data[0]['total_video'] - 1;
+            $new_total_video_second = $module_data[0]['total_video_second'] - $lesson_data[0]['duration_second'];
+            $statement = $pdo->prepare("update modules set total_video =?, total_video_second =? where id =?");
+            $statement->execute([
+                $new_total_video,
+                $new_total_video_second,
+                $_POST['module_id']
+            ]);
+    
+        }else {
+            unlink("uploads/". $lesson_data[0]['resource_content']);
+           
+            $new_total_resource = $module_data[0]['total_resource'] - 1;
+            $statement = $pdo->prepare("update modules set total_resource =? where id =?");
+            $statement->execute([
+                $new_total_resource,
+                $_POST['module_id']
+            ]);
+        }
+        $statement = $pdo->prepare("select * from courses where id =?");
+        $statement->execute([
+            $_POST['course_id']
+        ]);
+        $course_data = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+
+        if ($lesson_data[0]['lesson_type'] == "video") {
+            
+            $new_total_video = $course_data[0]['total_video'] - 1;
+            $new_total_video_second = $course_data[0]['total_video_second'] - $lesson_data[0]['duration_second'];
+            $statement = $pdo->prepare("update courses set total_video =?, total_video_second =? where id =?");
+            $statement->execute([
+                $new_total_video,
+                $new_total_video_second,
+                $_POST['course_id']
+            ]);
+    
+        }else {
+            $new_total_resource = $course_data[0]['total_resource'] - 1;
+            $statement = $pdo->prepare("update courses set total_resource =? where id =?");
+            $statement->execute([
+                $new_total_resource,
+                $_POST['course_id']
+            ]);
+        }
+
+        $statement = $pdo->prepare("delete from lessons where id=?");
+        $statement->execute([
+            $_POST['lesson_id']
+        ]);
+        $_SESSION['success'] = "Lesson is deleted successfully";
+        header("location:" . BASE_URL . 'instructor-course-edit-curriculum-lesson/' . $_POST['course_id'] . '/'. $_POST['module_id']);
         exit;
     }
 } catch (Exception $e) {
     $_SESSION['error'] = $e->getMessage();
-    header("location:" . BASE_URL . 'instructor-course-edit-curriculum/' .  $_POST['course_id']);
+    header("location:" . BASE_URL . 'instructor-course-edit-curriculum-lesson/' . $_POST['course_id'] . '/'. $_POST['module_id']);
     exit;
 }
 
@@ -475,7 +550,7 @@ $module_data = $statement1->fetchAll(PDO::FETCH_ASSOC);
                                                     <a href="" class="btn btn-primary"
                                                         data-bs-toggle="modal" data-bs-target="#editModule<?= $index ?>"><i class="fas fa-edit"></i></a>
                                                     <a href="" class="btn btn-danger"
-                                                        data-bs-toggle="modal" data-bs-target="#deleteModule<?= $index ?>"><i class="fas fa-trash"></i></a>
+                                                        data-bs-toggle="modal" data-bs-target="#deleteLesson<?= $index ?>"><i class="fas fa-trash"></i></a>
                                                 </td>
 
                                                 <!-- edit Modal -->
@@ -483,20 +558,32 @@ $module_data = $statement1->fetchAll(PDO::FETCH_ASSOC);
                                                     <div class="modal-dialog">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
-                                                                <h5 class="modal-title">Edit Module</h5>
+                                                                <h5 class="modal-title">Edit Lesson</h5>
                                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <div class="modal-body">
                                                                 <div class="card">
                                                                     <div class="card-body">
                                                                         <form action="" method="post">
-                                                                            <input type="hidden" name="module_id" value="<?= $row['id'] ?>">
+                                                                            <input type="hidden" name="lesson_id" value="<?= $row['id'] ?>">
                                                                             <input type="hidden" name="course_id" value="<?= $row['course_id'] ?>">
+                                                                            <input type="hidden" name="module_id" value="<?= $row['module_id'] ?>">
                                                                             <div class="row">
                                                                                 <div class="col-md-12">
                                                                                     <div class="form-group mb-3">
                                                                                         <label>Name</label>
                                                                                         <input type="text" class="form-control" name="name" value="<?= $row['name'] ?>">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="row" >
+                                                                                <div class="col-md-12">
+                                                                                    <div class="form-group mb-3">
+                                                                                        <label>Is preview</label>
+                                                                                        <select class="form-select" name="is_preview" >
+                                                                                            <option value="0" <?= $row['is_preview'] == 0 ? "selected" : "" ?>>No</option>
+                                                                                            <option value="1" <?= $row['is_preview'] == 1 ? "selected" : "" ?>>Yes</option>
+                                                                                        </select>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -511,7 +598,7 @@ $module_data = $statement1->fetchAll(PDO::FETCH_ASSOC);
 
 
                                                                             <div class="form-group">
-                                                                                <button type="submit" class="btn btn-primary" name="form_module_edit">Submit</button>
+                                                                                <button type="submit" class="btn btn-primary" name="form_lesson_edit">Submit</button>
                                                                             </div>
                                                                         </form>
                                                                     </div>
@@ -522,24 +609,25 @@ $module_data = $statement1->fetchAll(PDO::FETCH_ASSOC);
                                                     </div>
                                                 </div>
                                                 <!-- edit Modal -->
-                                                <div class="modal fade" id="deleteModule<?= $index ?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                <div class="modal fade" id="deleteLesson<?= $index ?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                                     <div class="modal-dialog">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
-                                                                <h5 class="modal-title">Edit Module</h5>
+                                                                <h5 class="modal-title">Delete Lesson</h5>
                                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <div class="modal-body">
                                                                 <div class="card">
                                                                     <div class="card-body">
                                                                         <form action="" method="post">
-                                                                            <input type="hidden" name="module_id" value="<?= $row['id'] ?>">
+                                                                            <input type="hidden" name="lesson_id" value="<?= $row['id'] ?>">
                                                                             <input type="hidden" name="course_id" value="<?= $row['course_id'] ?>">
+                                                                            <input type="hidden" name="module_id" value="<?= $row['module_id'] ?>">
 
                                                                             <label class="mb-4" for="">Are you sure to delete?</label>
 
                                                                             <div class="form-group">
-                                                                                <button type="submit" class="btn btn-primary" name="form_module_delete">Yes</button>
+                                                                                <button type="submit" class="btn btn-primary" name="form_lesson_delete">Yes</button>
                                                                             </div>
                                                                         </form>
                                                                     </div>

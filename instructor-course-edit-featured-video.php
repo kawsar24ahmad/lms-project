@@ -5,6 +5,17 @@ if (!isset($_SESSION['instructor'])) {
     header("location:" . BASE_URL . 'login');
     exit;
 }
+
+
+$full_url = 'http://'.$_SERVER['HTTP_HOST']. $_SERVER['REQUEST_URI'];
+$explode_result = explode("instructor-course-edit-featured-video", $full_url);
+$slashCount = substr_count($explode_result[1],"/");
+if ($slashCount > 1) {
+    header("location:" . BASE_URL . "instructor-courses");
+    exit;
+}
+
+
 $statement = $pdo->prepare("select * from courses where id =? and instructor_id =?");
 $statement->execute([
    $_REQUEST['id'],

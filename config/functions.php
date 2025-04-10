@@ -26,7 +26,23 @@ function convertSecondsToMinutesHours($seconds)  {
     
     $hours = floor($seconds / 3600);
     $minutes = floor(($seconds % 3600 ) / 60);
-    $remainingSeconds  = $seconds % 60;
+    $seconds  = $seconds % 60;
+    $time = [];
+    if ($hours>0) {
+        $time[] = $hours.'h';
+    }
+    if ($minutes>0) {
+        $time[] = $minutes.'m';
+    }
+    if ($seconds>0 || empty($time)) {
+        $time[] = $seconds.'s';
+    }
 
-    return "{$hours}h {$minutes}m {$remainingSeconds}s";
+    return implode(" ", $time);
+}
+
+function dd($input)  {
+    echo "<pre>";
+    var_dump($input);
+    die();
 }
