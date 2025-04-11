@@ -1,19 +1,12 @@
 <?php
 include "header.php";
-$full_url = 'http://'.$_SERVER['HTTP_HOST']. $_SERVER['REQUEST_URI'];
-$explode_result = explode("instructor-course-edit-curriculum-lesson", $full_url);
-$slashCount = substr_count($explode_result[1],"/");
-if ($slashCount > 2) {
-    header("location:" . BASE_URL . "instructor-courses");
-    exit;
-}
+
 
 if (!isset($_SESSION['instructor'])) {
     $_SESSION['error'] = "Login first";
     header("location:" . BASE_URL . 'login');
     exit;
 }
-// echo "<pre>";
 
 
 
@@ -24,10 +17,17 @@ $statement->execute([
 ]);
 $total = $statement->rowCount();
 if (!$total) {
-    $_SESSION['error'] = "Lesson is not found!";
+    $_SESSION['error'] = "Module is not found!";
     header("location:" . BASE_URL . "instructor-courses");
     exit;
 }
+$statement = $pdo->prepare("select * from courses where id =? and status =?");
+ $statement->execute([$_REQUEST['course_id'], "In Review"]);
+ $total = $statement->rowCount();
+ if ($total) {
+    header("location:" . BASE_URL. "instructor-courses");
+    exit;
+ }
 
 
 try {

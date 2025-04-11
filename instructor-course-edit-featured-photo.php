@@ -28,6 +28,13 @@ $statement->execute([
 
 $data = $statement->fetchAll(PDO::FETCH_ASSOC);
 
+$statement = $pdo->prepare("select * from courses where id =? and status =?");
+ $statement->execute([$_REQUEST['id'], "In Review"]);
+ $total = $statement->rowCount();
+ if ($total) {
+    header("location:" . BASE_URL. "instructor-courses");
+    exit;
+ }
 
 try {
     if (isset($_POST['form_submit'])) {
